@@ -384,7 +384,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         label.id = labelledBy;
       }
       this._ariaLabelledBy = labelledBy;
-    }
+    },
+
+    _onChange: function(event) {
+      // stop the propagation in shady DOM
+      event.stopPropagation();
+
+      this.fire('change', {
+        value: this.value
+      });
+    } 
 
   };
 
