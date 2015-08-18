@@ -417,6 +417,10 @@ This element is `display:block` by default, but you can set the `inline` attribu
       return Polymer.dom(this).querySelector(this._inputSelector);
     },
 
+    get __inputElementValue() {
+      return this._inputElement[this._propertyForValue] || this._inputElement.value;
+    },
+
     ready: function() {
       if (!this._addons) {
         this._addons = [];
@@ -431,7 +435,8 @@ This element is `display:block` by default, but you can set the `inline` attribu
     },
 
     attached: function() {
-      this._handleValue(this._inputElement);
+      // Only validate when attached if the input already has a value.
+      this._handleValue(this._inputElement, (this.__inputElementValue != ''));
     },
 
     _onAddonAttached: function(event) {
@@ -442,7 +447,7 @@ This element is `display:block` by default, but you can set the `inline` attribu
       if (this._addons.indexOf(target) === -1) {
         this._addons.push(target);
         if (this.isAttached) {
-          this._handleValue(this._inputElement);
+          this._handleValue(this._inputElement, false);
         }
       }
     },
@@ -453,20 +458,21 @@ This element is `display:block` by default, but you can set the `inline` attribu
 
     _onBlur: function() {
       this._setFocused(false);
+      this._handleValue(this._inputElement, true);
     },
 
     _onInput: function(event) {
-      this._handleValue(event.target);
+      this._handleValue(event.target, true);
     },
 
     _onValueChanged: function(event) {
-      this._handleValue(event.target);
+      this._handleValue(event.target, true);
     },
 
-    _handleValue: function(inputElement) {
-      var value = inputElement[this._propertyForValue] || inputElement.value;
+    _handleValue: function(inputElement, validateNow) {
+      var value = this.__inputElementValue;
 
-      if (this.autoValidate) {
+      if (validateNow && this.autoValidate) {
         var valid;
         if (inputElement.validate) {
           valid = inputElement.validate(value);
